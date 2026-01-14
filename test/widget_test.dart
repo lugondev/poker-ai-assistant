@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:poker_ai_calculator/main.dart';
+import 'package:poker_aa/main.dart';
 
 void main() {
   testWidgets('App renders successfully', (WidgetTester tester) async {

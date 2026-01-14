@@ -3,6 +3,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../ai_chat/presentation/providers/chat_controller.dart';
+import '../../../ai_chat/presentation/widgets/chat_bottom_sheet.dart';
+import '../../../ai_chat/presentation/widgets/chat_fab.dart';
 import '../../domain/entities/game_settings.dart';
 import '../../domain/entities/player.dart';
 import '../providers/calculator_controller.dart';
@@ -22,66 +25,86 @@ class PokerCalculatorScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(calculatorControllerProvider);
     final controller = ref.read(calculatorControllerProvider.notifier);
+    final chatState = ref.watch(chatControllerProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A2E),
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            _buildHeader(context, state, controller),
-            _buildGameInfoBar(state, controller),
-            _buildBoardPhaseTabs(state, controller),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 12),
-                    _buildBoardSection(context, state, controller),
-                    const SizedBox(height: 12),
-                    _buildPotAndOddsSection(state),
-                    const SizedBox(height: 12),
-                    _buildPlayersHeader(context, state, controller),
-                    const SizedBox(height: 8),
-                    ...state.players.map(
-                      (player) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: _PlayerRow(
-                          player: player,
-                          isSelected: state.selectedPlayerIndex == player.index,
-                          gameSettings: state.gameSettings,
-                          players: state.players,
-                          dealerButtonIndex: state.dealerButtonIndex,
-                          onSelect: () => controller.selectPlayer(player.index),
-                          onRemove: player.isHero
-                              ? null
-                              : () => controller.removePlayer(player.index),
-                          onRemoveCard: (cardIndex) => controller
-                              .removeCardFromPlayer(player.index, cardIndex),
-                          onRangeSelected: (range) =>
-                              controller.setPlayerRange(player.index, range),
-                          onShowStats: () =>
-                              showPlayerStatsModal(context, player: player),
-                          onStackChanged: (newStack) => controller
-                              .updatePlayerStack(player.index, newStack),
-                          onDealerChanged: controller.setDealerPosition,
+            Column(
+              children: [
+                _buildHeader(context, state, controller),
+                _buildGameInfoBar(state, controller),
+                _buildBoardPhaseTabs(state, controller),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 12),
+                        _buildBoardSection(context, state, controller),
+                        const SizedBox(height: 12),
+                        _buildPotAndOddsSection(state),
+                        const SizedBox(height: 12),
+                        _buildPlayersHeader(context, state, controller),
+                        const SizedBox(height: 8),
+                        ...state.players.map(
+                          (player) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: _PlayerRow(
+                              player: player,
+                              isSelected:
+                                  state.selectedPlayerIndex == player.index,
+                              gameSettings: state.gameSettings,
+                              players: state.players,
+                              dealerButtonIndex: state.dealerButtonIndex,
+                              onSelect: () =>
+                                  controller.selectPlayer(player.index),
+                              onRemove: player.isHero
+                                  ? null
+                                  : () => controller.removePlayer(player.index),
+                              onRemoveCard: (cardIndex) =>
+                                  controller.removeCardFromPlayer(
+                                    player.index,
+                                    cardIndex,
+                                  ),
+                              onRangeSelected: (range) => controller
+                                  .setPlayerRange(player.index, range),
+                              onShowStats: () =>
+                                  showPlayerStatsModal(context, player: player),
+                              onStackChanged: (newStack) => controller
+                                  .updatePlayerStack(player.index, newStack),
+                              onDealerChanged: controller.setDealerPosition,
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: 16),
+                        _buildBettingSection(state, controller),
+                        const SizedBox(height: 16),
+                        _buildActionButtons(context, state, controller),
+                        const SizedBox(height: 16),
+                      ],
                     ),
-                    const SizedBox(height: 16),
-                    _buildBettingSection(state, controller),
-                    const SizedBox(height: 16),
-                    _buildActionButtons(context, state, controller),
-                    const SizedBox(height: 16),
-                  ],
+                  ),
                 ),
+                CardSelectorWidget(
+                  onCardSelected: controller.addCard,
+                  usedCards: state.usedCards.toSet(),
+                ),
+              ],
+            ),
+            // Chat FAB - positioned above card selector
+            if (!chatState.isOpen)
+              Positioned(
+                right: 16,
+                bottom: 180, // Above card selector
+                child: const ChatFAB(),
               ),
-            ),
-            CardSelectorWidget(
-              onCardSelected: controller.addCard,
-              usedCards: state.usedCards.toSet(),
-            ),
+            // Chat Bottom Sheet
+            if (chatState.isOpen)
+              const Positioned.fill(child: ChatBottomSheet()),
           ],
         ),
       ),
