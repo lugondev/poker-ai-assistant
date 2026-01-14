@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/models/ai_models.dart';
@@ -198,5 +199,10 @@ class ChatController extends _$ChatController {
     );
 
     state = state.copyWith(messages: [...state.messages, systemMessage]);
+  }
+
+  /// Update FAB position
+  void updateFabPosition(Offset? position) {
+    state = state.copyWith(fabPosition: position);
   }
 }

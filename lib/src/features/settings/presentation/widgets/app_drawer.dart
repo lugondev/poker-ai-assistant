@@ -6,7 +6,9 @@ import '../../../ai_chat/data/models/ai_models.dart';
 import '../../../ai_chat/presentation/providers/ai_service_provider.dart';
 import '../screens/about_screen.dart';
 import '../screens/ai_settings_screen.dart';
+import '../screens/game_settings_screen.dart';
 import '../screens/help_screen.dart';
+import '../screens/poker_rules_screen.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
@@ -111,11 +113,15 @@ class AppDrawer extends ConsumerWidget {
                   _buildMenuItem(
                     context,
                     icon: Icons.tune,
-                    title: 'Preferences',
-                    subtitle: 'App settings',
+                    title: 'Game Settings',
+                    subtitle: 'Blinds, stacks & game type',
                     onTap: () {
                       Navigator.of(context).pop();
-                      _showComingSoon(context);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const GameSettingsScreen(),
+                        ),
+                      );
                     },
                   ),
                   const Divider(
@@ -133,6 +139,20 @@ class AppDrawer extends ConsumerWidget {
                       Navigator.of(context).pop();
                       Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const HelpScreen()),
+                      );
+                    },
+                  ),
+                  _buildMenuItem(
+                    context,
+                    icon: Icons.casino,
+                    title: 'Poker Rules',
+                    subtitle: 'Texas Hold\'em rules & hand rankings',
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const PokerRulesScreen(),
+                        ),
                       );
                     },
                   ),

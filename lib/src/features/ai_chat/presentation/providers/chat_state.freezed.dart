@@ -22,7 +22,8 @@ mixin _$ChatState {
  String? get errorMessage;/// Quick action suggestions based on context
  List<QuickAction> get quickActions;/// Current game context snapshot
  GameContextSnapshot? get currentContext;/// Number of unread messages
- int get unreadCount;
+ int get unreadCount;/// FAB position (null = default position)
+ Offset? get fabPosition;
 /// Create a copy of ChatState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -33,16 +34,16 @@ $ChatStateCopyWith<ChatState> get copyWith => _$ChatStateCopyWithImpl<ChatState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatState&&const DeepCollectionEquality().equals(other.messages, messages)&&(identical(other.isOpen, isOpen) || other.isOpen == isOpen)&&(identical(other.isTyping, isTyping) || other.isTyping == isTyping)&&(identical(other.streamingContent, streamingContent) || other.streamingContent == streamingContent)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&const DeepCollectionEquality().equals(other.quickActions, quickActions)&&(identical(other.currentContext, currentContext) || other.currentContext == currentContext)&&(identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatState&&const DeepCollectionEquality().equals(other.messages, messages)&&(identical(other.isOpen, isOpen) || other.isOpen == isOpen)&&(identical(other.isTyping, isTyping) || other.isTyping == isTyping)&&(identical(other.streamingContent, streamingContent) || other.streamingContent == streamingContent)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&const DeepCollectionEquality().equals(other.quickActions, quickActions)&&(identical(other.currentContext, currentContext) || other.currentContext == currentContext)&&(identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount)&&(identical(other.fabPosition, fabPosition) || other.fabPosition == fabPosition));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(messages),isOpen,isTyping,streamingContent,errorMessage,const DeepCollectionEquality().hash(quickActions),currentContext,unreadCount);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(messages),isOpen,isTyping,streamingContent,errorMessage,const DeepCollectionEquality().hash(quickActions),currentContext,unreadCount,fabPosition);
 
 @override
 String toString() {
-  return 'ChatState(messages: $messages, isOpen: $isOpen, isTyping: $isTyping, streamingContent: $streamingContent, errorMessage: $errorMessage, quickActions: $quickActions, currentContext: $currentContext, unreadCount: $unreadCount)';
+  return 'ChatState(messages: $messages, isOpen: $isOpen, isTyping: $isTyping, streamingContent: $streamingContent, errorMessage: $errorMessage, quickActions: $quickActions, currentContext: $currentContext, unreadCount: $unreadCount, fabPosition: $fabPosition)';
 }
 
 
@@ -53,7 +54,7 @@ abstract mixin class $ChatStateCopyWith<$Res>  {
   factory $ChatStateCopyWith(ChatState value, $Res Function(ChatState) _then) = _$ChatStateCopyWithImpl;
 @useResult
 $Res call({
- List<ChatMessage> messages, bool isOpen, bool isTyping, String streamingContent, String? errorMessage, List<QuickAction> quickActions, GameContextSnapshot? currentContext, int unreadCount
+ List<ChatMessage> messages, bool isOpen, bool isTyping, String streamingContent, String? errorMessage, List<QuickAction> quickActions, GameContextSnapshot? currentContext, int unreadCount, Offset? fabPosition
 });
 
 
@@ -70,7 +71,7 @@ class _$ChatStateCopyWithImpl<$Res>
 
 /// Create a copy of ChatState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? messages = null,Object? isOpen = null,Object? isTyping = null,Object? streamingContent = null,Object? errorMessage = freezed,Object? quickActions = null,Object? currentContext = freezed,Object? unreadCount = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? messages = null,Object? isOpen = null,Object? isTyping = null,Object? streamingContent = null,Object? errorMessage = freezed,Object? quickActions = null,Object? currentContext = freezed,Object? unreadCount = null,Object? fabPosition = freezed,}) {
   return _then(_self.copyWith(
 messages: null == messages ? _self.messages : messages // ignore: cast_nullable_to_non_nullable
 as List<ChatMessage>,isOpen: null == isOpen ? _self.isOpen : isOpen // ignore: cast_nullable_to_non_nullable
@@ -80,7 +81,8 @@ as String,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMess
 as String?,quickActions: null == quickActions ? _self.quickActions : quickActions // ignore: cast_nullable_to_non_nullable
 as List<QuickAction>,currentContext: freezed == currentContext ? _self.currentContext : currentContext // ignore: cast_nullable_to_non_nullable
 as GameContextSnapshot?,unreadCount: null == unreadCount ? _self.unreadCount : unreadCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,fabPosition: freezed == fabPosition ? _self.fabPosition : fabPosition // ignore: cast_nullable_to_non_nullable
+as Offset?,
   ));
 }
 /// Create a copy of ChatState
@@ -177,10 +179,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<ChatMessage> messages,  bool isOpen,  bool isTyping,  String streamingContent,  String? errorMessage,  List<QuickAction> quickActions,  GameContextSnapshot? currentContext,  int unreadCount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<ChatMessage> messages,  bool isOpen,  bool isTyping,  String streamingContent,  String? errorMessage,  List<QuickAction> quickActions,  GameContextSnapshot? currentContext,  int unreadCount,  Offset? fabPosition)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChatState() when $default != null:
-return $default(_that.messages,_that.isOpen,_that.isTyping,_that.streamingContent,_that.errorMessage,_that.quickActions,_that.currentContext,_that.unreadCount);case _:
+return $default(_that.messages,_that.isOpen,_that.isTyping,_that.streamingContent,_that.errorMessage,_that.quickActions,_that.currentContext,_that.unreadCount,_that.fabPosition);case _:
   return orElse();
 
 }
@@ -198,10 +200,10 @@ return $default(_that.messages,_that.isOpen,_that.isTyping,_that.streamingConten
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<ChatMessage> messages,  bool isOpen,  bool isTyping,  String streamingContent,  String? errorMessage,  List<QuickAction> quickActions,  GameContextSnapshot? currentContext,  int unreadCount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<ChatMessage> messages,  bool isOpen,  bool isTyping,  String streamingContent,  String? errorMessage,  List<QuickAction> quickActions,  GameContextSnapshot? currentContext,  int unreadCount,  Offset? fabPosition)  $default,) {final _that = this;
 switch (_that) {
 case _ChatState():
-return $default(_that.messages,_that.isOpen,_that.isTyping,_that.streamingContent,_that.errorMessage,_that.quickActions,_that.currentContext,_that.unreadCount);case _:
+return $default(_that.messages,_that.isOpen,_that.isTyping,_that.streamingContent,_that.errorMessage,_that.quickActions,_that.currentContext,_that.unreadCount,_that.fabPosition);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -218,10 +220,10 @@ return $default(_that.messages,_that.isOpen,_that.isTyping,_that.streamingConten
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<ChatMessage> messages,  bool isOpen,  bool isTyping,  String streamingContent,  String? errorMessage,  List<QuickAction> quickActions,  GameContextSnapshot? currentContext,  int unreadCount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<ChatMessage> messages,  bool isOpen,  bool isTyping,  String streamingContent,  String? errorMessage,  List<QuickAction> quickActions,  GameContextSnapshot? currentContext,  int unreadCount,  Offset? fabPosition)?  $default,) {final _that = this;
 switch (_that) {
 case _ChatState() when $default != null:
-return $default(_that.messages,_that.isOpen,_that.isTyping,_that.streamingContent,_that.errorMessage,_that.quickActions,_that.currentContext,_that.unreadCount);case _:
+return $default(_that.messages,_that.isOpen,_that.isTyping,_that.streamingContent,_that.errorMessage,_that.quickActions,_that.currentContext,_that.unreadCount,_that.fabPosition);case _:
   return null;
 
 }
@@ -233,7 +235,7 @@ return $default(_that.messages,_that.isOpen,_that.isTyping,_that.streamingConten
 
 
 class _ChatState extends ChatState {
-  const _ChatState({final  List<ChatMessage> messages = const [], this.isOpen = false, this.isTyping = false, this.streamingContent = '', this.errorMessage = null, final  List<QuickAction> quickActions = const [], this.currentContext = null, this.unreadCount = 0}): _messages = messages,_quickActions = quickActions,super._();
+  const _ChatState({final  List<ChatMessage> messages = const [], this.isOpen = false, this.isTyping = false, this.streamingContent = '', this.errorMessage = null, final  List<QuickAction> quickActions = const [], this.currentContext = null, this.unreadCount = 0, this.fabPosition = null}): _messages = messages,_quickActions = quickActions,super._();
   
 
 /// List of chat messages
@@ -266,6 +268,8 @@ class _ChatState extends ChatState {
 @override@JsonKey() final  GameContextSnapshot? currentContext;
 /// Number of unread messages
 @override@JsonKey() final  int unreadCount;
+/// FAB position (null = default position)
+@override@JsonKey() final  Offset? fabPosition;
 
 /// Create a copy of ChatState
 /// with the given fields replaced by the non-null parameter values.
@@ -277,16 +281,16 @@ _$ChatStateCopyWith<_ChatState> get copyWith => __$ChatStateCopyWithImpl<_ChatSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatState&&const DeepCollectionEquality().equals(other._messages, _messages)&&(identical(other.isOpen, isOpen) || other.isOpen == isOpen)&&(identical(other.isTyping, isTyping) || other.isTyping == isTyping)&&(identical(other.streamingContent, streamingContent) || other.streamingContent == streamingContent)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&const DeepCollectionEquality().equals(other._quickActions, _quickActions)&&(identical(other.currentContext, currentContext) || other.currentContext == currentContext)&&(identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatState&&const DeepCollectionEquality().equals(other._messages, _messages)&&(identical(other.isOpen, isOpen) || other.isOpen == isOpen)&&(identical(other.isTyping, isTyping) || other.isTyping == isTyping)&&(identical(other.streamingContent, streamingContent) || other.streamingContent == streamingContent)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&const DeepCollectionEquality().equals(other._quickActions, _quickActions)&&(identical(other.currentContext, currentContext) || other.currentContext == currentContext)&&(identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount)&&(identical(other.fabPosition, fabPosition) || other.fabPosition == fabPosition));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_messages),isOpen,isTyping,streamingContent,errorMessage,const DeepCollectionEquality().hash(_quickActions),currentContext,unreadCount);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_messages),isOpen,isTyping,streamingContent,errorMessage,const DeepCollectionEquality().hash(_quickActions),currentContext,unreadCount,fabPosition);
 
 @override
 String toString() {
-  return 'ChatState(messages: $messages, isOpen: $isOpen, isTyping: $isTyping, streamingContent: $streamingContent, errorMessage: $errorMessage, quickActions: $quickActions, currentContext: $currentContext, unreadCount: $unreadCount)';
+  return 'ChatState(messages: $messages, isOpen: $isOpen, isTyping: $isTyping, streamingContent: $streamingContent, errorMessage: $errorMessage, quickActions: $quickActions, currentContext: $currentContext, unreadCount: $unreadCount, fabPosition: $fabPosition)';
 }
 
 
@@ -297,7 +301,7 @@ abstract mixin class _$ChatStateCopyWith<$Res> implements $ChatStateCopyWith<$Re
   factory _$ChatStateCopyWith(_ChatState value, $Res Function(_ChatState) _then) = __$ChatStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<ChatMessage> messages, bool isOpen, bool isTyping, String streamingContent, String? errorMessage, List<QuickAction> quickActions, GameContextSnapshot? currentContext, int unreadCount
+ List<ChatMessage> messages, bool isOpen, bool isTyping, String streamingContent, String? errorMessage, List<QuickAction> quickActions, GameContextSnapshot? currentContext, int unreadCount, Offset? fabPosition
 });
 
 
@@ -314,7 +318,7 @@ class __$ChatStateCopyWithImpl<$Res>
 
 /// Create a copy of ChatState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? messages = null,Object? isOpen = null,Object? isTyping = null,Object? streamingContent = null,Object? errorMessage = freezed,Object? quickActions = null,Object? currentContext = freezed,Object? unreadCount = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? messages = null,Object? isOpen = null,Object? isTyping = null,Object? streamingContent = null,Object? errorMessage = freezed,Object? quickActions = null,Object? currentContext = freezed,Object? unreadCount = null,Object? fabPosition = freezed,}) {
   return _then(_ChatState(
 messages: null == messages ? _self._messages : messages // ignore: cast_nullable_to_non_nullable
 as List<ChatMessage>,isOpen: null == isOpen ? _self.isOpen : isOpen // ignore: cast_nullable_to_non_nullable
@@ -324,7 +328,8 @@ as String,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMess
 as String?,quickActions: null == quickActions ? _self._quickActions : quickActions // ignore: cast_nullable_to_non_nullable
 as List<QuickAction>,currentContext: freezed == currentContext ? _self.currentContext : currentContext // ignore: cast_nullable_to_non_nullable
 as GameContextSnapshot?,unreadCount: null == unreadCount ? _self.unreadCount : unreadCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,fabPosition: freezed == fabPosition ? _self.fabPosition : fabPosition // ignore: cast_nullable_to_non_nullable
+as Offset?,
   ));
 }
 

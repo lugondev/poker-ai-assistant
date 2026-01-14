@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../domain/entities/chat_message.dart';
@@ -33,6 +34,9 @@ abstract class ChatState with _$ChatState {
 
     /// Number of unread messages
     @Default(0) int unreadCount,
+
+    /// FAB position (null = default position)
+    @Default(null) Offset? fabPosition,
   }) = _ChatState;
 
   /// Check if there are any messages

@@ -14,7 +14,6 @@ import '../providers/calculator_controller.dart';
 import '../providers/calculator_state.dart';
 import '../widgets/betting_action_widget.dart';
 import '../widgets/card_selector_widget.dart' show showCardSelector;
-import '../widgets/game_settings_widget.dart';
 import '../widgets/player_stats_widget.dart';
 import '../widgets/playing_card_widget.dart';
 import '../widgets/range_selector_widget.dart';
@@ -103,9 +102,8 @@ class PokerCalculatorScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              // Chat FAB
-              if (!chatState.isOpen)
-                Positioned(right: 16, bottom: 24, child: const ChatFAB()),
+              // Chat FAB (draggable, manages its own position)
+              if (!chatState.isOpen) const ChatFAB(),
               // Chat Bottom Sheet
               if (chatState.isOpen)
                 const Positioned.fill(child: ChatBottomSheet()),
@@ -157,12 +155,6 @@ class PokerCalculatorScreen extends ConsumerWidget {
           ),
           Row(
             children: [
-              // Settings button
-              IconButton(
-                onPressed: () => _showGameSettings(context, state, controller),
-                icon: const Icon(Icons.settings, color: Colors.white70),
-                tooltip: 'Game Settings',
-              ),
               // New Hand button
               TextButton(
                 onPressed: controller.startNewHand,
@@ -238,21 +230,6 @@ class PokerCalculatorScreen extends ConsumerWidget {
           ),
       ],
     );
-  }
-
-  Future<void> _showGameSettings(
-    BuildContext context,
-    CalculatorState state,
-    CalculatorController controller,
-  ) async {
-    final newSettings = await showGameSettingsModal(
-      context,
-      currentSettings: state.gameSettings,
-    );
-
-    if (newSettings != null) {
-      controller.updateGameSettings(newSettings);
-    }
   }
 
   Widget _buildBoardPhaseTabs(
