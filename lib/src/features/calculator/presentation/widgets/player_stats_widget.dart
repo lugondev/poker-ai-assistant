@@ -308,7 +308,11 @@ Future<void> showPlayerStatsModal(
       builder: (context, scrollController) => PlayerStatsWidget(
         player: player,
         boardCards: boardCards,
-        onClose: () => Navigator.of(context).pop(),
+        onClose: () {
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop();
+          }
+        },
       ),
     ),
   );

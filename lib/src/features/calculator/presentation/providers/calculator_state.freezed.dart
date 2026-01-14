@@ -24,7 +24,12 @@ mixin _$CalculatorState {
  String? get errorMessage;/// Current hand rank for hero
  String? get heroHandRank;/// Total pot size for odds calculation
  double get potSize;/// List of betting actions for analysis
- List<PlayerAction> get bettingHistory;
+ List<PlayerAction> get bettingHistory;/// Game settings (blinds, stack, etc.)
+ GameSettings get gameSettings;/// Current betting state
+ BettingState get bettingState;/// Index of player whose turn it is to act
+ int get currentTurnIndex;/// Is hand in progress (cards dealt, betting active)
+ bool get isHandInProgress;/// Dealer button position (player index)
+ int get dealerButtonIndex;
 /// Create a copy of CalculatorState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -35,16 +40,16 @@ $CalculatorStateCopyWith<CalculatorState> get copyWith => _$CalculatorStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CalculatorState&&const DeepCollectionEquality().equals(other.players, players)&&const DeepCollectionEquality().equals(other.boardCards, boardCards)&&(identical(other.boardPhase, boardPhase) || other.boardPhase == boardPhase)&&(identical(other.selectedPlayerIndex, selectedPlayerIndex) || other.selectedPlayerIndex == selectedPlayerIndex)&&(identical(other.selectionTarget, selectionTarget) || other.selectionTarget == selectionTarget)&&(identical(other.isCalculating, isCalculating) || other.isCalculating == isCalculating)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.heroHandRank, heroHandRank) || other.heroHandRank == heroHandRank)&&(identical(other.potSize, potSize) || other.potSize == potSize)&&const DeepCollectionEquality().equals(other.bettingHistory, bettingHistory));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CalculatorState&&const DeepCollectionEquality().equals(other.players, players)&&const DeepCollectionEquality().equals(other.boardCards, boardCards)&&(identical(other.boardPhase, boardPhase) || other.boardPhase == boardPhase)&&(identical(other.selectedPlayerIndex, selectedPlayerIndex) || other.selectedPlayerIndex == selectedPlayerIndex)&&(identical(other.selectionTarget, selectionTarget) || other.selectionTarget == selectionTarget)&&(identical(other.isCalculating, isCalculating) || other.isCalculating == isCalculating)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.heroHandRank, heroHandRank) || other.heroHandRank == heroHandRank)&&(identical(other.potSize, potSize) || other.potSize == potSize)&&const DeepCollectionEquality().equals(other.bettingHistory, bettingHistory)&&(identical(other.gameSettings, gameSettings) || other.gameSettings == gameSettings)&&(identical(other.bettingState, bettingState) || other.bettingState == bettingState)&&(identical(other.currentTurnIndex, currentTurnIndex) || other.currentTurnIndex == currentTurnIndex)&&(identical(other.isHandInProgress, isHandInProgress) || other.isHandInProgress == isHandInProgress)&&(identical(other.dealerButtonIndex, dealerButtonIndex) || other.dealerButtonIndex == dealerButtonIndex));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(players),const DeepCollectionEquality().hash(boardCards),boardPhase,selectedPlayerIndex,selectionTarget,isCalculating,errorMessage,heroHandRank,potSize,const DeepCollectionEquality().hash(bettingHistory));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(players),const DeepCollectionEquality().hash(boardCards),boardPhase,selectedPlayerIndex,selectionTarget,isCalculating,errorMessage,heroHandRank,potSize,const DeepCollectionEquality().hash(bettingHistory),gameSettings,bettingState,currentTurnIndex,isHandInProgress,dealerButtonIndex);
 
 @override
 String toString() {
-  return 'CalculatorState(players: $players, boardCards: $boardCards, boardPhase: $boardPhase, selectedPlayerIndex: $selectedPlayerIndex, selectionTarget: $selectionTarget, isCalculating: $isCalculating, errorMessage: $errorMessage, heroHandRank: $heroHandRank, potSize: $potSize, bettingHistory: $bettingHistory)';
+  return 'CalculatorState(players: $players, boardCards: $boardCards, boardPhase: $boardPhase, selectedPlayerIndex: $selectedPlayerIndex, selectionTarget: $selectionTarget, isCalculating: $isCalculating, errorMessage: $errorMessage, heroHandRank: $heroHandRank, potSize: $potSize, bettingHistory: $bettingHistory, gameSettings: $gameSettings, bettingState: $bettingState, currentTurnIndex: $currentTurnIndex, isHandInProgress: $isHandInProgress, dealerButtonIndex: $dealerButtonIndex)';
 }
 
 
@@ -55,11 +60,11 @@ abstract mixin class $CalculatorStateCopyWith<$Res>  {
   factory $CalculatorStateCopyWith(CalculatorState value, $Res Function(CalculatorState) _then) = _$CalculatorStateCopyWithImpl;
 @useResult
 $Res call({
- List<Player> players, List<PlayingCard> boardCards, BoardPhase boardPhase, int selectedPlayerIndex, SelectionTarget selectionTarget, bool isCalculating, String? errorMessage, String? heroHandRank, double potSize, List<PlayerAction> bettingHistory
+ List<Player> players, List<PlayingCard> boardCards, BoardPhase boardPhase, int selectedPlayerIndex, SelectionTarget selectionTarget, bool isCalculating, String? errorMessage, String? heroHandRank, double potSize, List<PlayerAction> bettingHistory, GameSettings gameSettings, BettingState bettingState, int currentTurnIndex, bool isHandInProgress, int dealerButtonIndex
 });
 
 
-
+$GameSettingsCopyWith<$Res> get gameSettings;$BettingStateCopyWith<$Res> get bettingState;
 
 }
 /// @nodoc
@@ -72,7 +77,7 @@ class _$CalculatorStateCopyWithImpl<$Res>
 
 /// Create a copy of CalculatorState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? players = null,Object? boardCards = null,Object? boardPhase = null,Object? selectedPlayerIndex = null,Object? selectionTarget = null,Object? isCalculating = null,Object? errorMessage = freezed,Object? heroHandRank = freezed,Object? potSize = null,Object? bettingHistory = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? players = null,Object? boardCards = null,Object? boardPhase = null,Object? selectedPlayerIndex = null,Object? selectionTarget = null,Object? isCalculating = null,Object? errorMessage = freezed,Object? heroHandRank = freezed,Object? potSize = null,Object? bettingHistory = null,Object? gameSettings = null,Object? bettingState = null,Object? currentTurnIndex = null,Object? isHandInProgress = null,Object? dealerButtonIndex = null,}) {
   return _then(_self.copyWith(
 players: null == players ? _self.players : players // ignore: cast_nullable_to_non_nullable
 as List<Player>,boardCards: null == boardCards ? _self.boardCards : boardCards // ignore: cast_nullable_to_non_nullable
@@ -84,10 +89,33 @@ as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessag
 as String?,heroHandRank: freezed == heroHandRank ? _self.heroHandRank : heroHandRank // ignore: cast_nullable_to_non_nullable
 as String?,potSize: null == potSize ? _self.potSize : potSize // ignore: cast_nullable_to_non_nullable
 as double,bettingHistory: null == bettingHistory ? _self.bettingHistory : bettingHistory // ignore: cast_nullable_to_non_nullable
-as List<PlayerAction>,
+as List<PlayerAction>,gameSettings: null == gameSettings ? _self.gameSettings : gameSettings // ignore: cast_nullable_to_non_nullable
+as GameSettings,bettingState: null == bettingState ? _self.bettingState : bettingState // ignore: cast_nullable_to_non_nullable
+as BettingState,currentTurnIndex: null == currentTurnIndex ? _self.currentTurnIndex : currentTurnIndex // ignore: cast_nullable_to_non_nullable
+as int,isHandInProgress: null == isHandInProgress ? _self.isHandInProgress : isHandInProgress // ignore: cast_nullable_to_non_nullable
+as bool,dealerButtonIndex: null == dealerButtonIndex ? _self.dealerButtonIndex : dealerButtonIndex // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
-
+/// Create a copy of CalculatorState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$GameSettingsCopyWith<$Res> get gameSettings {
+  
+  return $GameSettingsCopyWith<$Res>(_self.gameSettings, (value) {
+    return _then(_self.copyWith(gameSettings: value));
+  });
+}/// Create a copy of CalculatorState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$BettingStateCopyWith<$Res> get bettingState {
+  
+  return $BettingStateCopyWith<$Res>(_self.bettingState, (value) {
+    return _then(_self.copyWith(bettingState: value));
+  });
+}
 }
 
 
@@ -169,10 +197,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<Player> players,  List<PlayingCard> boardCards,  BoardPhase boardPhase,  int selectedPlayerIndex,  SelectionTarget selectionTarget,  bool isCalculating,  String? errorMessage,  String? heroHandRank,  double potSize,  List<PlayerAction> bettingHistory)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<Player> players,  List<PlayingCard> boardCards,  BoardPhase boardPhase,  int selectedPlayerIndex,  SelectionTarget selectionTarget,  bool isCalculating,  String? errorMessage,  String? heroHandRank,  double potSize,  List<PlayerAction> bettingHistory,  GameSettings gameSettings,  BettingState bettingState,  int currentTurnIndex,  bool isHandInProgress,  int dealerButtonIndex)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CalculatorState() when $default != null:
-return $default(_that.players,_that.boardCards,_that.boardPhase,_that.selectedPlayerIndex,_that.selectionTarget,_that.isCalculating,_that.errorMessage,_that.heroHandRank,_that.potSize,_that.bettingHistory);case _:
+return $default(_that.players,_that.boardCards,_that.boardPhase,_that.selectedPlayerIndex,_that.selectionTarget,_that.isCalculating,_that.errorMessage,_that.heroHandRank,_that.potSize,_that.bettingHistory,_that.gameSettings,_that.bettingState,_that.currentTurnIndex,_that.isHandInProgress,_that.dealerButtonIndex);case _:
   return orElse();
 
 }
@@ -190,10 +218,10 @@ return $default(_that.players,_that.boardCards,_that.boardPhase,_that.selectedPl
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<Player> players,  List<PlayingCard> boardCards,  BoardPhase boardPhase,  int selectedPlayerIndex,  SelectionTarget selectionTarget,  bool isCalculating,  String? errorMessage,  String? heroHandRank,  double potSize,  List<PlayerAction> bettingHistory)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<Player> players,  List<PlayingCard> boardCards,  BoardPhase boardPhase,  int selectedPlayerIndex,  SelectionTarget selectionTarget,  bool isCalculating,  String? errorMessage,  String? heroHandRank,  double potSize,  List<PlayerAction> bettingHistory,  GameSettings gameSettings,  BettingState bettingState,  int currentTurnIndex,  bool isHandInProgress,  int dealerButtonIndex)  $default,) {final _that = this;
 switch (_that) {
 case _CalculatorState():
-return $default(_that.players,_that.boardCards,_that.boardPhase,_that.selectedPlayerIndex,_that.selectionTarget,_that.isCalculating,_that.errorMessage,_that.heroHandRank,_that.potSize,_that.bettingHistory);case _:
+return $default(_that.players,_that.boardCards,_that.boardPhase,_that.selectedPlayerIndex,_that.selectionTarget,_that.isCalculating,_that.errorMessage,_that.heroHandRank,_that.potSize,_that.bettingHistory,_that.gameSettings,_that.bettingState,_that.currentTurnIndex,_that.isHandInProgress,_that.dealerButtonIndex);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +238,10 @@ return $default(_that.players,_that.boardCards,_that.boardPhase,_that.selectedPl
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<Player> players,  List<PlayingCard> boardCards,  BoardPhase boardPhase,  int selectedPlayerIndex,  SelectionTarget selectionTarget,  bool isCalculating,  String? errorMessage,  String? heroHandRank,  double potSize,  List<PlayerAction> bettingHistory)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<Player> players,  List<PlayingCard> boardCards,  BoardPhase boardPhase,  int selectedPlayerIndex,  SelectionTarget selectionTarget,  bool isCalculating,  String? errorMessage,  String? heroHandRank,  double potSize,  List<PlayerAction> bettingHistory,  GameSettings gameSettings,  BettingState bettingState,  int currentTurnIndex,  bool isHandInProgress,  int dealerButtonIndex)?  $default,) {final _that = this;
 switch (_that) {
 case _CalculatorState() when $default != null:
-return $default(_that.players,_that.boardCards,_that.boardPhase,_that.selectedPlayerIndex,_that.selectionTarget,_that.isCalculating,_that.errorMessage,_that.heroHandRank,_that.potSize,_that.bettingHistory);case _:
+return $default(_that.players,_that.boardCards,_that.boardPhase,_that.selectedPlayerIndex,_that.selectionTarget,_that.isCalculating,_that.errorMessage,_that.heroHandRank,_that.potSize,_that.bettingHistory,_that.gameSettings,_that.bettingState,_that.currentTurnIndex,_that.isHandInProgress,_that.dealerButtonIndex);case _:
   return null;
 
 }
@@ -225,7 +253,7 @@ return $default(_that.players,_that.boardCards,_that.boardPhase,_that.selectedPl
 
 
 class _CalculatorState extends CalculatorState {
-  const _CalculatorState({final  List<Player> players = const [], final  List<PlayingCard> boardCards = const [], this.boardPhase = BoardPhase.flop, this.selectedPlayerIndex = 0, this.selectionTarget = SelectionTarget.player, this.isCalculating = false, this.errorMessage = null, this.heroHandRank = null, this.potSize = 0, final  List<PlayerAction> bettingHistory = const []}): _players = players,_boardCards = boardCards,_bettingHistory = bettingHistory,super._();
+  const _CalculatorState({final  List<Player> players = const [], final  List<PlayingCard> boardCards = const [], this.boardPhase = BoardPhase.flop, this.selectedPlayerIndex = 0, this.selectionTarget = SelectionTarget.player, this.isCalculating = false, this.errorMessage = null, this.heroHandRank = null, this.potSize = 0, final  List<PlayerAction> bettingHistory = const [], this.gameSettings = const GameSettings(), this.bettingState = const BettingState(), this.currentTurnIndex = -1, this.isHandInProgress = false, this.dealerButtonIndex = 0}): _players = players,_boardCards = boardCards,_bettingHistory = bettingHistory,super._();
   
 
 /// List of players (first player is always Hero)
@@ -269,6 +297,16 @@ class _CalculatorState extends CalculatorState {
   return EqualUnmodifiableListView(_bettingHistory);
 }
 
+/// Game settings (blinds, stack, etc.)
+@override@JsonKey() final  GameSettings gameSettings;
+/// Current betting state
+@override@JsonKey() final  BettingState bettingState;
+/// Index of player whose turn it is to act
+@override@JsonKey() final  int currentTurnIndex;
+/// Is hand in progress (cards dealt, betting active)
+@override@JsonKey() final  bool isHandInProgress;
+/// Dealer button position (player index)
+@override@JsonKey() final  int dealerButtonIndex;
 
 /// Create a copy of CalculatorState
 /// with the given fields replaced by the non-null parameter values.
@@ -280,16 +318,16 @@ _$CalculatorStateCopyWith<_CalculatorState> get copyWith => __$CalculatorStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CalculatorState&&const DeepCollectionEquality().equals(other._players, _players)&&const DeepCollectionEquality().equals(other._boardCards, _boardCards)&&(identical(other.boardPhase, boardPhase) || other.boardPhase == boardPhase)&&(identical(other.selectedPlayerIndex, selectedPlayerIndex) || other.selectedPlayerIndex == selectedPlayerIndex)&&(identical(other.selectionTarget, selectionTarget) || other.selectionTarget == selectionTarget)&&(identical(other.isCalculating, isCalculating) || other.isCalculating == isCalculating)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.heroHandRank, heroHandRank) || other.heroHandRank == heroHandRank)&&(identical(other.potSize, potSize) || other.potSize == potSize)&&const DeepCollectionEquality().equals(other._bettingHistory, _bettingHistory));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CalculatorState&&const DeepCollectionEquality().equals(other._players, _players)&&const DeepCollectionEquality().equals(other._boardCards, _boardCards)&&(identical(other.boardPhase, boardPhase) || other.boardPhase == boardPhase)&&(identical(other.selectedPlayerIndex, selectedPlayerIndex) || other.selectedPlayerIndex == selectedPlayerIndex)&&(identical(other.selectionTarget, selectionTarget) || other.selectionTarget == selectionTarget)&&(identical(other.isCalculating, isCalculating) || other.isCalculating == isCalculating)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.heroHandRank, heroHandRank) || other.heroHandRank == heroHandRank)&&(identical(other.potSize, potSize) || other.potSize == potSize)&&const DeepCollectionEquality().equals(other._bettingHistory, _bettingHistory)&&(identical(other.gameSettings, gameSettings) || other.gameSettings == gameSettings)&&(identical(other.bettingState, bettingState) || other.bettingState == bettingState)&&(identical(other.currentTurnIndex, currentTurnIndex) || other.currentTurnIndex == currentTurnIndex)&&(identical(other.isHandInProgress, isHandInProgress) || other.isHandInProgress == isHandInProgress)&&(identical(other.dealerButtonIndex, dealerButtonIndex) || other.dealerButtonIndex == dealerButtonIndex));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_players),const DeepCollectionEquality().hash(_boardCards),boardPhase,selectedPlayerIndex,selectionTarget,isCalculating,errorMessage,heroHandRank,potSize,const DeepCollectionEquality().hash(_bettingHistory));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_players),const DeepCollectionEquality().hash(_boardCards),boardPhase,selectedPlayerIndex,selectionTarget,isCalculating,errorMessage,heroHandRank,potSize,const DeepCollectionEquality().hash(_bettingHistory),gameSettings,bettingState,currentTurnIndex,isHandInProgress,dealerButtonIndex);
 
 @override
 String toString() {
-  return 'CalculatorState(players: $players, boardCards: $boardCards, boardPhase: $boardPhase, selectedPlayerIndex: $selectedPlayerIndex, selectionTarget: $selectionTarget, isCalculating: $isCalculating, errorMessage: $errorMessage, heroHandRank: $heroHandRank, potSize: $potSize, bettingHistory: $bettingHistory)';
+  return 'CalculatorState(players: $players, boardCards: $boardCards, boardPhase: $boardPhase, selectedPlayerIndex: $selectedPlayerIndex, selectionTarget: $selectionTarget, isCalculating: $isCalculating, errorMessage: $errorMessage, heroHandRank: $heroHandRank, potSize: $potSize, bettingHistory: $bettingHistory, gameSettings: $gameSettings, bettingState: $bettingState, currentTurnIndex: $currentTurnIndex, isHandInProgress: $isHandInProgress, dealerButtonIndex: $dealerButtonIndex)';
 }
 
 
@@ -300,11 +338,11 @@ abstract mixin class _$CalculatorStateCopyWith<$Res> implements $CalculatorState
   factory _$CalculatorStateCopyWith(_CalculatorState value, $Res Function(_CalculatorState) _then) = __$CalculatorStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<Player> players, List<PlayingCard> boardCards, BoardPhase boardPhase, int selectedPlayerIndex, SelectionTarget selectionTarget, bool isCalculating, String? errorMessage, String? heroHandRank, double potSize, List<PlayerAction> bettingHistory
+ List<Player> players, List<PlayingCard> boardCards, BoardPhase boardPhase, int selectedPlayerIndex, SelectionTarget selectionTarget, bool isCalculating, String? errorMessage, String? heroHandRank, double potSize, List<PlayerAction> bettingHistory, GameSettings gameSettings, BettingState bettingState, int currentTurnIndex, bool isHandInProgress, int dealerButtonIndex
 });
 
 
-
+@override $GameSettingsCopyWith<$Res> get gameSettings;@override $BettingStateCopyWith<$Res> get bettingState;
 
 }
 /// @nodoc
@@ -317,7 +355,7 @@ class __$CalculatorStateCopyWithImpl<$Res>
 
 /// Create a copy of CalculatorState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? players = null,Object? boardCards = null,Object? boardPhase = null,Object? selectedPlayerIndex = null,Object? selectionTarget = null,Object? isCalculating = null,Object? errorMessage = freezed,Object? heroHandRank = freezed,Object? potSize = null,Object? bettingHistory = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? players = null,Object? boardCards = null,Object? boardPhase = null,Object? selectedPlayerIndex = null,Object? selectionTarget = null,Object? isCalculating = null,Object? errorMessage = freezed,Object? heroHandRank = freezed,Object? potSize = null,Object? bettingHistory = null,Object? gameSettings = null,Object? bettingState = null,Object? currentTurnIndex = null,Object? isHandInProgress = null,Object? dealerButtonIndex = null,}) {
   return _then(_CalculatorState(
 players: null == players ? _self._players : players // ignore: cast_nullable_to_non_nullable
 as List<Player>,boardCards: null == boardCards ? _self._boardCards : boardCards // ignore: cast_nullable_to_non_nullable
@@ -329,11 +367,34 @@ as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessag
 as String?,heroHandRank: freezed == heroHandRank ? _self.heroHandRank : heroHandRank // ignore: cast_nullable_to_non_nullable
 as String?,potSize: null == potSize ? _self.potSize : potSize // ignore: cast_nullable_to_non_nullable
 as double,bettingHistory: null == bettingHistory ? _self._bettingHistory : bettingHistory // ignore: cast_nullable_to_non_nullable
-as List<PlayerAction>,
+as List<PlayerAction>,gameSettings: null == gameSettings ? _self.gameSettings : gameSettings // ignore: cast_nullable_to_non_nullable
+as GameSettings,bettingState: null == bettingState ? _self.bettingState : bettingState // ignore: cast_nullable_to_non_nullable
+as BettingState,currentTurnIndex: null == currentTurnIndex ? _self.currentTurnIndex : currentTurnIndex // ignore: cast_nullable_to_non_nullable
+as int,isHandInProgress: null == isHandInProgress ? _self.isHandInProgress : isHandInProgress // ignore: cast_nullable_to_non_nullable
+as bool,dealerButtonIndex: null == dealerButtonIndex ? _self.dealerButtonIndex : dealerButtonIndex // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
-
+/// Create a copy of CalculatorState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$GameSettingsCopyWith<$Res> get gameSettings {
+  
+  return $GameSettingsCopyWith<$Res>(_self.gameSettings, (value) {
+    return _then(_self.copyWith(gameSettings: value));
+  });
+}/// Create a copy of CalculatorState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$BettingStateCopyWith<$Res> get bettingState {
+  
+  return $BettingStateCopyWith<$Res>(_self.bettingState, (value) {
+    return _then(_self.copyWith(bettingState: value));
+  });
+}
 }
 
 // dart format on

@@ -668,8 +668,16 @@ Future<Set<String>?> showRangeSelectorModal(
       maxChildSize: 0.95,
       builder: (context, scrollController) => RangeSelectorWidget(
         initialSelectedHands: initialSelectedHands,
-        onRangeSelected: (hands) => Navigator.of(context).pop(hands),
-        onCancel: () => Navigator.of(context).pop(),
+        onRangeSelected: (hands) {
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop(hands);
+          }
+        },
+        onCancel: () {
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop();
+          }
+        },
       ),
     ),
   );

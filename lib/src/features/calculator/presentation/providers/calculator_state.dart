@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../domain/entities/card_entity.dart';
+import '../../domain/entities/game_settings.dart';
 import '../../domain/entities/player.dart';
 
 part 'calculator_state.freezed.dart';
@@ -53,6 +54,21 @@ abstract class CalculatorState with _$CalculatorState {
 
     /// List of betting actions for analysis
     @Default([]) List<PlayerAction> bettingHistory,
+
+    /// Game settings (blinds, stack, etc.)
+    @Default(GameSettings()) GameSettings gameSettings,
+
+    /// Current betting state
+    @Default(BettingState()) BettingState bettingState,
+
+    /// Index of player whose turn it is to act
+    @Default(-1) int currentTurnIndex,
+
+    /// Is hand in progress (cards dealt, betting active)
+    @Default(false) bool isHandInProgress,
+
+    /// Dealer button position (player index)
+    @Default(0) int dealerButtonIndex,
   }) = _CalculatorState;
 
   /// Get number of active players
@@ -95,4 +111,36 @@ abstract class CalculatorState with _$CalculatorState {
   /// Get players remaining (with cards or unknown)
   int get playersRemaining =>
       players.where((p) => p.holeCards.isNotEmpty || p.useRange).length;
+
+  /// Get players still in hand (not folded)
+  List<Player> get playersInHand => players.where((p) => !p.isFolded).toList();
+
+  /// Get current player to act
+  Player? get currentPlayer =>
+      currentTurnIndex >= 0 && currentTurnIndex < players.length
+      ? players[currentTurnIndex]
+      : null;
+
+  /// Get amount to call for current player
+  double get amountToCall {
+    final player = currentPlayer;
+    if (player == null) return 0;
+    return bettingState.currentBet - player.currentBet;
+  }
+
+  /// Calculate pot odds (call amount : pot size)
+  double get potOdds {
+    if (amountToCall <= 0 || potSize <= 0) return 0;
+    return amountToCall / (potSize + amountToCall) * 100;
+  }
+
+  /// Get pot odds as ratio string
+  String get potOddsRatio {
+    if (amountToCall <= 0) return '-';
+    final ratio = potSize / amountToCall;
+    return '${ratio.toStringAsFixed(1)}:1';
+  }
+
+  /// Get required equity to call (in %)
+  double get requiredEquityToCall => potOdds;
 }

@@ -15,7 +15,15 @@ T _$identity<T>(T value) => value;
 mixin _$Player {
 
  String get id; int get index; List<PlayingCard> get holeCards; PlayerEquity? get equity; bool get isHero; bool get isSelected; bool get useRange;/// Selected hand range for opponents (e.g., {'AA', 'AKs', 'KK'})
- Set<String> get selectedRange;
+ Set<String> get selectedRange;/// Player's current chip stack
+ double get stack;/// Amount bet in current round
+ double get currentBet;/// Total amount invested in this hand
+ double get totalInvested;/// Player position at the table
+ PlayerPosition? get position;/// Has player folded this hand
+ bool get isFolded;/// Is player all-in
+ bool get isAllIn;/// Is it this player's turn to act
+ bool get isCurrentTurn;/// Has player acted in current betting round
+ bool get hasActed;
 /// Create a copy of Player
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -26,16 +34,16 @@ $PlayerCopyWith<Player> get copyWith => _$PlayerCopyWithImpl<Player>(this as Pla
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Player&&(identical(other.id, id) || other.id == id)&&(identical(other.index, index) || other.index == index)&&const DeepCollectionEquality().equals(other.holeCards, holeCards)&&(identical(other.equity, equity) || other.equity == equity)&&(identical(other.isHero, isHero) || other.isHero == isHero)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.useRange, useRange) || other.useRange == useRange)&&const DeepCollectionEquality().equals(other.selectedRange, selectedRange));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Player&&(identical(other.id, id) || other.id == id)&&(identical(other.index, index) || other.index == index)&&const DeepCollectionEquality().equals(other.holeCards, holeCards)&&(identical(other.equity, equity) || other.equity == equity)&&(identical(other.isHero, isHero) || other.isHero == isHero)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.useRange, useRange) || other.useRange == useRange)&&const DeepCollectionEquality().equals(other.selectedRange, selectedRange)&&(identical(other.stack, stack) || other.stack == stack)&&(identical(other.currentBet, currentBet) || other.currentBet == currentBet)&&(identical(other.totalInvested, totalInvested) || other.totalInvested == totalInvested)&&(identical(other.position, position) || other.position == position)&&(identical(other.isFolded, isFolded) || other.isFolded == isFolded)&&(identical(other.isAllIn, isAllIn) || other.isAllIn == isAllIn)&&(identical(other.isCurrentTurn, isCurrentTurn) || other.isCurrentTurn == isCurrentTurn)&&(identical(other.hasActed, hasActed) || other.hasActed == hasActed));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,index,const DeepCollectionEquality().hash(holeCards),equity,isHero,isSelected,useRange,const DeepCollectionEquality().hash(selectedRange));
+int get hashCode => Object.hash(runtimeType,id,index,const DeepCollectionEquality().hash(holeCards),equity,isHero,isSelected,useRange,const DeepCollectionEquality().hash(selectedRange),stack,currentBet,totalInvested,position,isFolded,isAllIn,isCurrentTurn,hasActed);
 
 @override
 String toString() {
-  return 'Player(id: $id, index: $index, holeCards: $holeCards, equity: $equity, isHero: $isHero, isSelected: $isSelected, useRange: $useRange, selectedRange: $selectedRange)';
+  return 'Player(id: $id, index: $index, holeCards: $holeCards, equity: $equity, isHero: $isHero, isSelected: $isSelected, useRange: $useRange, selectedRange: $selectedRange, stack: $stack, currentBet: $currentBet, totalInvested: $totalInvested, position: $position, isFolded: $isFolded, isAllIn: $isAllIn, isCurrentTurn: $isCurrentTurn, hasActed: $hasActed)';
 }
 
 
@@ -46,7 +54,7 @@ abstract mixin class $PlayerCopyWith<$Res>  {
   factory $PlayerCopyWith(Player value, $Res Function(Player) _then) = _$PlayerCopyWithImpl;
 @useResult
 $Res call({
- String id, int index, List<PlayingCard> holeCards, PlayerEquity? equity, bool isHero, bool isSelected, bool useRange, Set<String> selectedRange
+ String id, int index, List<PlayingCard> holeCards, PlayerEquity? equity, bool isHero, bool isSelected, bool useRange, Set<String> selectedRange, double stack, double currentBet, double totalInvested, PlayerPosition? position, bool isFolded, bool isAllIn, bool isCurrentTurn, bool hasActed
 });
 
 
@@ -63,7 +71,7 @@ class _$PlayerCopyWithImpl<$Res>
 
 /// Create a copy of Player
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? index = null,Object? holeCards = null,Object? equity = freezed,Object? isHero = null,Object? isSelected = null,Object? useRange = null,Object? selectedRange = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? index = null,Object? holeCards = null,Object? equity = freezed,Object? isHero = null,Object? isSelected = null,Object? useRange = null,Object? selectedRange = null,Object? stack = null,Object? currentBet = null,Object? totalInvested = null,Object? position = freezed,Object? isFolded = null,Object? isAllIn = null,Object? isCurrentTurn = null,Object? hasActed = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,index: null == index ? _self.index : index // ignore: cast_nullable_to_non_nullable
@@ -73,7 +81,15 @@ as PlayerEquity?,isHero: null == isHero ? _self.isHero : isHero // ignore: cast_
 as bool,isSelected: null == isSelected ? _self.isSelected : isSelected // ignore: cast_nullable_to_non_nullable
 as bool,useRange: null == useRange ? _self.useRange : useRange // ignore: cast_nullable_to_non_nullable
 as bool,selectedRange: null == selectedRange ? _self.selectedRange : selectedRange // ignore: cast_nullable_to_non_nullable
-as Set<String>,
+as Set<String>,stack: null == stack ? _self.stack : stack // ignore: cast_nullable_to_non_nullable
+as double,currentBet: null == currentBet ? _self.currentBet : currentBet // ignore: cast_nullable_to_non_nullable
+as double,totalInvested: null == totalInvested ? _self.totalInvested : totalInvested // ignore: cast_nullable_to_non_nullable
+as double,position: freezed == position ? _self.position : position // ignore: cast_nullable_to_non_nullable
+as PlayerPosition?,isFolded: null == isFolded ? _self.isFolded : isFolded // ignore: cast_nullable_to_non_nullable
+as bool,isAllIn: null == isAllIn ? _self.isAllIn : isAllIn // ignore: cast_nullable_to_non_nullable
+as bool,isCurrentTurn: null == isCurrentTurn ? _self.isCurrentTurn : isCurrentTurn // ignore: cast_nullable_to_non_nullable
+as bool,hasActed: null == hasActed ? _self.hasActed : hasActed // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 /// Create a copy of Player
@@ -170,10 +186,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int index,  List<PlayingCard> holeCards,  PlayerEquity? equity,  bool isHero,  bool isSelected,  bool useRange,  Set<String> selectedRange)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int index,  List<PlayingCard> holeCards,  PlayerEquity? equity,  bool isHero,  bool isSelected,  bool useRange,  Set<String> selectedRange,  double stack,  double currentBet,  double totalInvested,  PlayerPosition? position,  bool isFolded,  bool isAllIn,  bool isCurrentTurn,  bool hasActed)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Player() when $default != null:
-return $default(_that.id,_that.index,_that.holeCards,_that.equity,_that.isHero,_that.isSelected,_that.useRange,_that.selectedRange);case _:
+return $default(_that.id,_that.index,_that.holeCards,_that.equity,_that.isHero,_that.isSelected,_that.useRange,_that.selectedRange,_that.stack,_that.currentBet,_that.totalInvested,_that.position,_that.isFolded,_that.isAllIn,_that.isCurrentTurn,_that.hasActed);case _:
   return orElse();
 
 }
@@ -191,10 +207,10 @@ return $default(_that.id,_that.index,_that.holeCards,_that.equity,_that.isHero,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int index,  List<PlayingCard> holeCards,  PlayerEquity? equity,  bool isHero,  bool isSelected,  bool useRange,  Set<String> selectedRange)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int index,  List<PlayingCard> holeCards,  PlayerEquity? equity,  bool isHero,  bool isSelected,  bool useRange,  Set<String> selectedRange,  double stack,  double currentBet,  double totalInvested,  PlayerPosition? position,  bool isFolded,  bool isAllIn,  bool isCurrentTurn,  bool hasActed)  $default,) {final _that = this;
 switch (_that) {
 case _Player():
-return $default(_that.id,_that.index,_that.holeCards,_that.equity,_that.isHero,_that.isSelected,_that.useRange,_that.selectedRange);case _:
+return $default(_that.id,_that.index,_that.holeCards,_that.equity,_that.isHero,_that.isSelected,_that.useRange,_that.selectedRange,_that.stack,_that.currentBet,_that.totalInvested,_that.position,_that.isFolded,_that.isAllIn,_that.isCurrentTurn,_that.hasActed);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -211,10 +227,10 @@ return $default(_that.id,_that.index,_that.holeCards,_that.equity,_that.isHero,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int index,  List<PlayingCard> holeCards,  PlayerEquity? equity,  bool isHero,  bool isSelected,  bool useRange,  Set<String> selectedRange)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int index,  List<PlayingCard> holeCards,  PlayerEquity? equity,  bool isHero,  bool isSelected,  bool useRange,  Set<String> selectedRange,  double stack,  double currentBet,  double totalInvested,  PlayerPosition? position,  bool isFolded,  bool isAllIn,  bool isCurrentTurn,  bool hasActed)?  $default,) {final _that = this;
 switch (_that) {
 case _Player() when $default != null:
-return $default(_that.id,_that.index,_that.holeCards,_that.equity,_that.isHero,_that.isSelected,_that.useRange,_that.selectedRange);case _:
+return $default(_that.id,_that.index,_that.holeCards,_that.equity,_that.isHero,_that.isSelected,_that.useRange,_that.selectedRange,_that.stack,_that.currentBet,_that.totalInvested,_that.position,_that.isFolded,_that.isAllIn,_that.isCurrentTurn,_that.hasActed);case _:
   return null;
 
 }
@@ -226,7 +242,7 @@ return $default(_that.id,_that.index,_that.holeCards,_that.equity,_that.isHero,_
 
 
 class _Player extends Player {
-  const _Player({required this.id, required this.index, final  List<PlayingCard> holeCards = const [], this.equity = null, this.isHero = false, this.isSelected = false, this.useRange = false, final  Set<String> selectedRange = const {}}): _holeCards = holeCards,_selectedRange = selectedRange,super._();
+  const _Player({required this.id, required this.index, final  List<PlayingCard> holeCards = const [], this.equity = null, this.isHero = false, this.isSelected = false, this.useRange = false, final  Set<String> selectedRange = const {}, this.stack = 100, this.currentBet = 0, this.totalInvested = 0, this.position = null, this.isFolded = false, this.isAllIn = false, this.isCurrentTurn = false, this.hasActed = false}): _holeCards = holeCards,_selectedRange = selectedRange,super._();
   
 
 @override final  String id;
@@ -251,6 +267,22 @@ class _Player extends Player {
   return EqualUnmodifiableSetView(_selectedRange);
 }
 
+/// Player's current chip stack
+@override@JsonKey() final  double stack;
+/// Amount bet in current round
+@override@JsonKey() final  double currentBet;
+/// Total amount invested in this hand
+@override@JsonKey() final  double totalInvested;
+/// Player position at the table
+@override@JsonKey() final  PlayerPosition? position;
+/// Has player folded this hand
+@override@JsonKey() final  bool isFolded;
+/// Is player all-in
+@override@JsonKey() final  bool isAllIn;
+/// Is it this player's turn to act
+@override@JsonKey() final  bool isCurrentTurn;
+/// Has player acted in current betting round
+@override@JsonKey() final  bool hasActed;
 
 /// Create a copy of Player
 /// with the given fields replaced by the non-null parameter values.
@@ -262,16 +294,16 @@ _$PlayerCopyWith<_Player> get copyWith => __$PlayerCopyWithImpl<_Player>(this, _
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Player&&(identical(other.id, id) || other.id == id)&&(identical(other.index, index) || other.index == index)&&const DeepCollectionEquality().equals(other._holeCards, _holeCards)&&(identical(other.equity, equity) || other.equity == equity)&&(identical(other.isHero, isHero) || other.isHero == isHero)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.useRange, useRange) || other.useRange == useRange)&&const DeepCollectionEquality().equals(other._selectedRange, _selectedRange));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Player&&(identical(other.id, id) || other.id == id)&&(identical(other.index, index) || other.index == index)&&const DeepCollectionEquality().equals(other._holeCards, _holeCards)&&(identical(other.equity, equity) || other.equity == equity)&&(identical(other.isHero, isHero) || other.isHero == isHero)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.useRange, useRange) || other.useRange == useRange)&&const DeepCollectionEquality().equals(other._selectedRange, _selectedRange)&&(identical(other.stack, stack) || other.stack == stack)&&(identical(other.currentBet, currentBet) || other.currentBet == currentBet)&&(identical(other.totalInvested, totalInvested) || other.totalInvested == totalInvested)&&(identical(other.position, position) || other.position == position)&&(identical(other.isFolded, isFolded) || other.isFolded == isFolded)&&(identical(other.isAllIn, isAllIn) || other.isAllIn == isAllIn)&&(identical(other.isCurrentTurn, isCurrentTurn) || other.isCurrentTurn == isCurrentTurn)&&(identical(other.hasActed, hasActed) || other.hasActed == hasActed));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,index,const DeepCollectionEquality().hash(_holeCards),equity,isHero,isSelected,useRange,const DeepCollectionEquality().hash(_selectedRange));
+int get hashCode => Object.hash(runtimeType,id,index,const DeepCollectionEquality().hash(_holeCards),equity,isHero,isSelected,useRange,const DeepCollectionEquality().hash(_selectedRange),stack,currentBet,totalInvested,position,isFolded,isAllIn,isCurrentTurn,hasActed);
 
 @override
 String toString() {
-  return 'Player(id: $id, index: $index, holeCards: $holeCards, equity: $equity, isHero: $isHero, isSelected: $isSelected, useRange: $useRange, selectedRange: $selectedRange)';
+  return 'Player(id: $id, index: $index, holeCards: $holeCards, equity: $equity, isHero: $isHero, isSelected: $isSelected, useRange: $useRange, selectedRange: $selectedRange, stack: $stack, currentBet: $currentBet, totalInvested: $totalInvested, position: $position, isFolded: $isFolded, isAllIn: $isAllIn, isCurrentTurn: $isCurrentTurn, hasActed: $hasActed)';
 }
 
 
@@ -282,7 +314,7 @@ abstract mixin class _$PlayerCopyWith<$Res> implements $PlayerCopyWith<$Res> {
   factory _$PlayerCopyWith(_Player value, $Res Function(_Player) _then) = __$PlayerCopyWithImpl;
 @override @useResult
 $Res call({
- String id, int index, List<PlayingCard> holeCards, PlayerEquity? equity, bool isHero, bool isSelected, bool useRange, Set<String> selectedRange
+ String id, int index, List<PlayingCard> holeCards, PlayerEquity? equity, bool isHero, bool isSelected, bool useRange, Set<String> selectedRange, double stack, double currentBet, double totalInvested, PlayerPosition? position, bool isFolded, bool isAllIn, bool isCurrentTurn, bool hasActed
 });
 
 
@@ -299,7 +331,7 @@ class __$PlayerCopyWithImpl<$Res>
 
 /// Create a copy of Player
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? index = null,Object? holeCards = null,Object? equity = freezed,Object? isHero = null,Object? isSelected = null,Object? useRange = null,Object? selectedRange = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? index = null,Object? holeCards = null,Object? equity = freezed,Object? isHero = null,Object? isSelected = null,Object? useRange = null,Object? selectedRange = null,Object? stack = null,Object? currentBet = null,Object? totalInvested = null,Object? position = freezed,Object? isFolded = null,Object? isAllIn = null,Object? isCurrentTurn = null,Object? hasActed = null,}) {
   return _then(_Player(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,index: null == index ? _self.index : index // ignore: cast_nullable_to_non_nullable
@@ -309,7 +341,15 @@ as PlayerEquity?,isHero: null == isHero ? _self.isHero : isHero // ignore: cast_
 as bool,isSelected: null == isSelected ? _self.isSelected : isSelected // ignore: cast_nullable_to_non_nullable
 as bool,useRange: null == useRange ? _self.useRange : useRange // ignore: cast_nullable_to_non_nullable
 as bool,selectedRange: null == selectedRange ? _self._selectedRange : selectedRange // ignore: cast_nullable_to_non_nullable
-as Set<String>,
+as Set<String>,stack: null == stack ? _self.stack : stack // ignore: cast_nullable_to_non_nullable
+as double,currentBet: null == currentBet ? _self.currentBet : currentBet // ignore: cast_nullable_to_non_nullable
+as double,totalInvested: null == totalInvested ? _self.totalInvested : totalInvested // ignore: cast_nullable_to_non_nullable
+as double,position: freezed == position ? _self.position : position // ignore: cast_nullable_to_non_nullable
+as PlayerPosition?,isFolded: null == isFolded ? _self.isFolded : isFolded // ignore: cast_nullable_to_non_nullable
+as bool,isAllIn: null == isAllIn ? _self.isAllIn : isAllIn // ignore: cast_nullable_to_non_nullable
+as bool,isCurrentTurn: null == isCurrentTurn ? _self.isCurrentTurn : isCurrentTurn // ignore: cast_nullable_to_non_nullable
+as bool,hasActed: null == hasActed ? _self.hasActed : hasActed // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
