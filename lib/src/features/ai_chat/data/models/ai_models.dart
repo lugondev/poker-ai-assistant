@@ -8,13 +8,30 @@ part 'ai_models.g.dart';
 
 /// AI Provider types
 enum AiProvider {
-  openai('OpenAI', 'gpt-4o-mini'),
-  anthropic('Anthropic', 'claude-3-haiku-20240307'),
-  mock('Mock', 'mock-model');
+  openai('OpenAI', 'gpt-4o-mini', 'https://api.openai.com/v1'),
+  anthropic(
+    'Anthropic',
+    'claude-3-haiku-20240307',
+    'https://api.anthropic.com/v1',
+  ),
+  gemini(
+    'Google Gemini',
+    'gemini-1.5-flash',
+    'https://generativelanguage.googleapis.com/v1beta',
+  ),
+  grok('xAI Grok', 'grok-beta', 'https://api.x.ai/v1'),
+  deepseek('DeepSeek', 'deepseek-chat', 'https://api.deepseek.com/v1'),
+  openrouter(
+    'OpenRouter',
+    'openai/gpt-4o-mini',
+    'https://openrouter.ai/api/v1',
+  ),
+  mock('Mock', 'mock-model', '');
 
   final String displayName;
   final String defaultModel;
-  const AiProvider(this.displayName, this.defaultModel);
+  final String defaultBaseUrl;
+  const AiProvider(this.displayName, this.defaultModel, this.defaultBaseUrl);
 }
 
 /// AI Service configuration

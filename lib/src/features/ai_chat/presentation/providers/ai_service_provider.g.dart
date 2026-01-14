@@ -45,7 +45,7 @@ final isAiConfiguredProvider = AutoDisposeProvider<bool>.internal(
 // ignore: unused_element
 typedef IsAiConfiguredRef = AutoDisposeProviderRef<bool>;
 String _$aiConfigControllerHash() =>
-    r'ebab6a4448f1a2f4572d17d76147a6008d3c351b';
+    r'5aec9d31c984ff61ff281fdebc1ea14f74fcb4cf';
 
 /// Current AI configuration state
 ///

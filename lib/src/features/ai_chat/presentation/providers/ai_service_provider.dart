@@ -18,9 +18,27 @@ final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
 /// Current AI configuration state
 @riverpod
 class AiConfigController extends _$AiConfigController {
+  // Storage keys for each provider
+  static const _providerKeyName = 'ai_provider';
   static const _openaiKeyName = 'openai_api_key';
   static const _anthropicKeyName = 'anthropic_api_key';
-  static const _providerKeyName = 'ai_provider';
+  static const _geminiKeyName = 'gemini_api_key';
+  static const _grokKeyName = 'grok_api_key';
+  static const _deepseekKeyName = 'deepseek_api_key';
+  static const _openrouterKeyName = 'openrouter_api_key';
+
+  /// Get storage key name for a provider
+  String _getApiKeyName(AiProvider provider) {
+    return switch (provider) {
+      AiProvider.openai => _openaiKeyName,
+      AiProvider.anthropic => _anthropicKeyName,
+      AiProvider.gemini => _geminiKeyName,
+      AiProvider.grok => _grokKeyName,
+      AiProvider.deepseek => _deepseekKeyName,
+      AiProvider.openrouter => _openrouterKeyName,
+      AiProvider.mock => '',
+    };
+  }
 
   @override
   Future<AiConfig> build() async {
@@ -33,17 +51,18 @@ class AiConfigController extends _$AiConfigController {
       orElse: () => AiProvider.mock, // Default to mock
     );
 
+    // Load API key for the selected provider
     String apiKey = '';
-    if (provider == AiProvider.openai) {
-      apiKey = await storage.read(key: _openaiKeyName) ?? '';
-    } else if (provider == AiProvider.anthropic) {
-      apiKey = await storage.read(key: _anthropicKeyName) ?? '';
+    final keyName = _getApiKeyName(provider);
+    if (keyName.isNotEmpty) {
+      apiKey = await storage.read(key: keyName) ?? '';
     }
 
     return AiConfig(
       provider: provider,
       apiKey: apiKey,
       model: provider.defaultModel,
+      baseUrl: provider.defaultBaseUrl,
     );
   }
 
@@ -54,10 +73,9 @@ class AiConfigController extends _$AiConfigController {
 
     // Load API key for new provider
     String apiKey = '';
-    if (provider == AiProvider.openai) {
-      apiKey = await storage.read(key: _openaiKeyName) ?? '';
-    } else if (provider == AiProvider.anthropic) {
-      apiKey = await storage.read(key: _anthropicKeyName) ?? '';
+    final keyName = _getApiKeyName(provider);
+    if (keyName.isNotEmpty) {
+      apiKey = await storage.read(key: keyName) ?? '';
     }
 
     state = AsyncData(
@@ -65,6 +83,7 @@ class AiConfigController extends _$AiConfigController {
         provider: provider,
         apiKey: apiKey,
         model: provider.defaultModel,
+        baseUrl: provider.defaultBaseUrl,
       ),
     );
   }
@@ -75,11 +94,10 @@ class AiConfigController extends _$AiConfigController {
     if (current == null) return;
 
     final storage = ref.read(secureStorageProvider);
+    final keyName = _getApiKeyName(current.provider);
 
-    if (current.provider == AiProvider.openai) {
-      await storage.write(key: _openaiKeyName, value: apiKey);
-    } else if (current.provider == AiProvider.anthropic) {
-      await storage.write(key: _anthropicKeyName, value: apiKey);
+    if (keyName.isNotEmpty) {
+      await storage.write(key: keyName, value: apiKey);
     }
 
     state = AsyncData(current.copyWith(apiKey: apiKey));

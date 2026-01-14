@@ -29,6 +29,10 @@ Map<String, dynamic> _$AiConfigToJson(_AiConfig instance) => <String, dynamic>{
 const _$AiProviderEnumMap = {
   AiProvider.openai: 'openai',
   AiProvider.anthropic: 'anthropic',
+  AiProvider.gemini: 'gemini',
+  AiProvider.grok: 'grok',
+  AiProvider.deepseek: 'deepseek',
+  AiProvider.openrouter: 'openrouter',
   AiProvider.mock: 'mock',
 };
 
