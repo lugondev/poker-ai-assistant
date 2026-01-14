@@ -2,207 +2,307 @@ import 'dart:isolate';
 import 'dart:math';
 
 import '../entities/card_entity.dart';
+import '../entities/hand_rank.dart';
+import '../entities/player.dart';
 import 'hand_evaluator.dart';
 
 /// Parameters for Monte Carlo simulation to pass to Isolate
 class MonteCarloParams {
-  final List<Map<String, int>> playerHandData;
+  final List<Map<String, dynamic>> playersData;
   final List<Map<String, int>> communityCardsData;
-  final int opponentCount;
   final int simulations;
 
   MonteCarloParams({
-    required this.playerHandData,
+    required this.playersData,
     required this.communityCardsData,
-    required this.opponentCount,
     required this.simulations,
   });
 
-  static MonteCarloParams fromCards({
-    required List<PlayingCard> playerHand,
+  static MonteCarloParams fromPlayersAndCards({
+    required List<Player> players,
     required List<PlayingCard> communityCards,
-    required int opponentCount,
     required int simulations,
   }) {
     return MonteCarloParams(
-      playerHandData: playerHand
-          .map((c) => {'rank': c.rank.index, 'suit': c.suit.index})
-          .toList(),
+      playersData: players.map((p) {
+        return {
+          'id': p.id,
+          'holeCards': p.holeCards
+              .map((c) => {'rank': c.rank.index, 'suit': c.suit.index})
+              .toList(),
+          'useRange': p.useRange,
+        };
+      }).toList(),
       communityCardsData: communityCards
           .map((c) => {'rank': c.rank.index, 'suit': c.suit.index})
           .toList(),
-      opponentCount: opponentCount,
       simulations: simulations,
     );
   }
-
-  List<PlayingCard> get playerHand => playerHandData
-      .map(
-        (m) => PlayingCard(
-          rank: Rank.values[m['rank']!],
-          suit: Suit.values[m['suit']!],
-        ),
-      )
-      .toList();
-
-  List<PlayingCard> get communityCards => communityCardsData
-      .map(
-        (m) => PlayingCard(
-          rank: Rank.values[m['rank']!],
-          suit: Suit.values[m['suit']!],
-        ),
-      )
-      .toList();
 }
 
 /// Result data that can be passed back from Isolate
 class MonteCarloResultData {
-  final int wins;
-  final int ties;
-  final int losses;
+  final Map<String, PlayerResultData> playerResults;
   final int simulations;
 
   MonteCarloResultData({
+    required this.playerResults,
+    required this.simulations,
+  });
+}
+
+class PlayerResultData {
+  final String playerId;
+  final int wins;
+  final int ties;
+  final int losses;
+
+  PlayerResultData({
+    required this.playerId,
     required this.wins,
     required this.ties,
     required this.losses,
-    required this.simulations,
   });
+
+  double get winPercentage => wins / (wins + ties + losses) * 100;
+  double get tiePercentage => ties / (wins + ties + losses) * 100;
+  double get losePercentage => losses / (wins + ties + losses) * 100;
 }
 
 class MonteCarloEngine {
   static const int defaultSimulations = 10000;
 
-  /// Calculate equity using Isolate for better performance
+  /// Calculate equity for a single player against random opponents
   Future<EquityResult> calculateEquity({
     required List<PlayingCard> playerHand,
     required List<PlayingCard> communityCards,
     int opponentCount = 1,
     int simulations = defaultSimulations,
   }) async {
-    if (playerHand.length != 2) {
+    // Create player list for multi-player calculation
+    final players = <Player>[
+      Player(id: 'hero', index: 0, isHero: true, holeCards: playerHand),
+      for (var i = 0; i < opponentCount; i++)
+        Player(id: 'opponent_$i', index: i + 1, useRange: true),
+    ];
+
+    final results = await calculateMultiPlayerEquity(
+      players: players,
+      communityCards: communityCards,
+      simulations: simulations,
+    );
+
+    final heroResult = results['hero'];
+    if (heroResult == null) {
       return const EquityResult(
         winPercentage: 0,
         tiePercentage: 0,
         losePercentage: 100,
-        handStrength: 'Invalid Hand',
+        handStrength: 'Error',
         simulationsRun: 0,
       );
     }
 
-    final params = MonteCarloParams.fromCards(
-      playerHand: playerHand,
+    return EquityResult(
+      winPercentage: heroResult.winPercentage,
+      tiePercentage: heroResult.tiePercentage,
+      losePercentage: heroResult.losePercentage,
+      handStrength: _getHandStrengthLabel(heroResult.winPercentage),
+      simulationsRun: simulations,
+    );
+  }
+
+  /// Calculate equity for multiple players simultaneously
+  Future<Map<String, EquityResult>> calculateMultiPlayerEquity({
+    required List<Player> players,
+    required List<PlayingCard> communityCards,
+    int simulations = defaultSimulations,
+  }) async {
+    // Filter out players without cards and not using range
+    final activePlayers = players
+        .where((p) => p.holeCards.isNotEmpty || p.useRange)
+        .toList();
+
+    if (activePlayers.isEmpty) {
+      return {};
+    }
+
+    final params = MonteCarloParams.fromPlayersAndCards(
+      players: activePlayers,
       communityCards: communityCards,
-      opponentCount: opponentCount,
       simulations: simulations,
     );
 
     // Run simulation in Isolate
-    final resultData = await Isolate.run(() => _runSimulation(params));
-
-    final winPercentage = (resultData.wins / resultData.simulations) * 100;
-    final tiePercentage = (resultData.ties / resultData.simulations) * 100;
-    final losePercentage = (resultData.losses / resultData.simulations) * 100;
-
-    return EquityResult(
-      winPercentage: winPercentage,
-      tiePercentage: tiePercentage,
-      losePercentage: losePercentage,
-      handStrength: _getHandStrengthLabel(winPercentage),
-      simulationsRun: resultData.simulations,
+    final resultData = await Isolate.run(
+      () => _runMultiPlayerSimulation(params),
     );
+
+    // Convert to EquityResult map
+    final results = <String, EquityResult>{};
+    for (final entry in resultData.playerResults.entries) {
+      final playerResult = entry.value;
+      results[entry.key] = EquityResult(
+        winPercentage: playerResult.winPercentage,
+        tiePercentage: playerResult.tiePercentage,
+        losePercentage: playerResult.losePercentage,
+        handStrength: _getHandStrengthLabel(playerResult.winPercentage),
+        simulationsRun: simulations,
+      );
+    }
+
+    return results;
   }
 
   /// Static function that runs in Isolate
-  static MonteCarloResultData _runSimulation(MonteCarloParams params) {
+  static MonteCarloResultData _runMultiPlayerSimulation(
+    MonteCarloParams params,
+  ) {
     final evaluator = HandEvaluator();
     final random = Random();
 
-    final playerHand = params.playerHand;
-    final communityCards = params.communityCards;
+    // Parse player data
+    final players = params.playersData.map((data) {
+      final holeCards = (data['holeCards'] as List).map((m) {
+        final cardMap = m as Map<String, int>;
+        return PlayingCard(
+          rank: Rank.values[cardMap['rank']!],
+          suit: Suit.values[cardMap['suit']!],
+        );
+      }).toList();
 
-    final usedCards = {...playerHand, ...communityCards};
+      return _SimPlayer(
+        id: data['id'] as String,
+        holeCards: holeCards,
+        useRange: data['useRange'] as bool,
+      );
+    }).toList();
+
+    // Parse community cards
+    final communityCards = params.communityCardsData.map((m) {
+      return PlayingCard(
+        rank: Rank.values[m['rank']!],
+        suit: Suit.values[m['suit']!],
+      );
+    }).toList();
+
+    // Initialize results
+    final results = <String, _SimResult>{};
+    for (final player in players) {
+      results[player.id] = _SimResult();
+    }
+
+    // Get used cards
+    final usedCards = <PlayingCard>{};
+    for (final player in players) {
+      usedCards.addAll(player.holeCards);
+    }
+    usedCards.addAll(communityCards);
+
     final deck = PlayingCard.fullDeck
         .where((card) => !usedCards.contains(card))
         .toList();
 
-    int wins = 0;
-    int ties = 0;
-    int losses = 0;
-
+    // Run simulations
     for (var i = 0; i < params.simulations; i++) {
-      final result = _simulateHand(
+      _simulateHand(
         evaluator: evaluator,
         random: random,
-        playerHand: playerHand,
+        players: players,
         communityCards: communityCards,
         deck: List.from(deck),
-        opponentCount: params.opponentCount,
+        results: results,
       );
+    }
 
-      switch (result) {
-        case 1:
-          wins++;
-          break;
-        case 0:
-          ties++;
-          break;
-        case -1:
-          losses++;
-          break;
-      }
+    // Convert to result data
+    final playerResults = <String, PlayerResultData>{};
+    for (final entry in results.entries) {
+      playerResults[entry.key] = PlayerResultData(
+        playerId: entry.key,
+        wins: entry.value.wins,
+        ties: entry.value.ties,
+        losses: entry.value.losses,
+      );
     }
 
     return MonteCarloResultData(
-      wins: wins,
-      ties: ties,
-      losses: losses,
+      playerResults: playerResults,
       simulations: params.simulations,
     );
   }
 
-  static int _simulateHand({
+  static void _simulateHand({
     required HandEvaluator evaluator,
     required Random random,
-    required List<PlayingCard> playerHand,
+    required List<_SimPlayer> players,
     required List<PlayingCard> communityCards,
     required List<PlayingCard> deck,
-    required int opponentCount,
+    required Map<String, _SimResult> results,
   }) {
     _shuffleDeck(deck, random);
 
-    final remainingCommunity = 5 - communityCards.length;
-    final simulatedCommunity = List<PlayingCard>.from(communityCards);
     var deckIndex = 0;
 
+    // Deal cards to players using range
+    final playerHands = <String, List<PlayingCard>>{};
+    for (final player in players) {
+      if (player.useRange) {
+        playerHands[player.id] = [deck[deckIndex++], deck[deckIndex++]];
+      } else {
+        playerHands[player.id] = player.holeCards;
+      }
+    }
+
+    // Complete community cards
+    final remainingCommunity = 5 - communityCards.length;
+    final simulatedCommunity = List<PlayingCard>.from(communityCards);
     for (var i = 0; i < remainingCommunity; i++) {
       simulatedCommunity.add(deck[deckIndex++]);
     }
 
-    final playerCards = [...playerHand, ...simulatedCommunity];
-    final playerEval = evaluator.evaluate(playerCards);
+    // Evaluate all hands
+    final evaluations = <String, EvaluatedHand>{};
+    for (final player in players) {
+      final hand = playerHands[player.id]!;
+      final allCards = [...hand, ...simulatedCommunity];
+      evaluations[player.id] = evaluator.evaluate(allCards);
+    }
 
-    var playerWins = true;
-    var isTie = false;
+    // Find winner(s)
+    EvaluatedHand? bestEval;
+    final winners = <String>[];
 
-    for (var o = 0; o < opponentCount; o++) {
-      final opponentHand = [deck[deckIndex++], deck[deckIndex++]];
-      final opponentCards = [...opponentHand, ...simulatedCommunity];
-      final opponentEval = evaluator.evaluate(opponentCards);
-
-      final comparison = playerEval.compareTo(opponentEval);
-      if (comparison < 0) {
-        playerWins = false;
-        isTie = false;
-        break;
-      } else if (comparison == 0) {
-        isTie = true;
+    for (final entry in evaluations.entries) {
+      if (bestEval == null) {
+        bestEval = entry.value;
+        winners.add(entry.key);
+      } else {
+        final comparison = entry.value.compareTo(bestEval);
+        if (comparison > 0) {
+          bestEval = entry.value;
+          winners.clear();
+          winners.add(entry.key);
+        } else if (comparison == 0) {
+          winners.add(entry.key);
+        }
       }
     }
 
-    if (!playerWins) return -1;
-    if (isTie) return 0;
-    return 1;
+    // Update results
+    final isTie = winners.length > 1;
+    for (final player in players) {
+      if (winners.contains(player.id)) {
+        if (isTie) {
+          results[player.id]!.ties++;
+        } else {
+          results[player.id]!.wins++;
+        }
+      } else {
+        results[player.id]!.losses++;
+      }
+    }
   }
 
   static void _shuffleDeck(List<PlayingCard> deck, Random random) {
@@ -222,6 +322,26 @@ class MonteCarloEngine {
     if (winPercentage >= 15) return 'Weak';
     return 'Fold';
   }
+}
+
+/// Internal player representation for simulation
+class _SimPlayer {
+  final String id;
+  final List<PlayingCard> holeCards;
+  final bool useRange;
+
+  _SimPlayer({
+    required this.id,
+    required this.holeCards,
+    required this.useRange,
+  });
+}
+
+/// Internal result tracker
+class _SimResult {
+  int wins = 0;
+  int ties = 0;
+  int losses = 0;
 }
 
 class EquityResult {

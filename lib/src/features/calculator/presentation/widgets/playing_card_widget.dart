@@ -11,6 +11,7 @@ class PlayingCardWidget extends StatelessWidget {
   final VoidCallback? onRemove;
   final double width;
   final double height;
+  final bool showQuestionMark;
 
   const PlayingCardWidget({
     super.key,
@@ -21,6 +22,7 @@ class PlayingCardWidget extends StatelessWidget {
     this.onRemove,
     this.width = 60,
     this.height = 84,
+    this.showQuestionMark = false,
   });
 
   @override
@@ -39,20 +41,29 @@ class PlayingCardWidget extends StatelessWidget {
         height: height,
         margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? Colors.amber : Colors.white24,
+            color: isSelected ? Colors.amber : Colors.grey.shade400,
             width: isSelected ? 2 : 1,
             style: BorderStyle.solid,
           ),
         ),
         child: Center(
-          child: Icon(
-            Icons.add,
-            color: isSelected ? Colors.amber : Colors.white30,
-            size: 24,
-          ),
+          child: showQuestionMark
+              ? Text(
+                  '?',
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: height * 0.5,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              : Icon(
+                  Icons.add,
+                  color: isSelected ? Colors.amber : Colors.grey.shade400,
+                  size: 24,
+                ),
         ),
       ),
     );
