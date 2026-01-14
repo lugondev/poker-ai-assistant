@@ -20,8 +20,8 @@ A Flutter application for calculating poker hand equity and odds.
 
 1. Clone the repository
 ```bash
-git clone https://github.com/lugon/poker-ai-calculator.git
-cd poker-ai-calculator
+git clone https://github.com/lugondev/poker-ai-assistant.git
+cd poker-ai-assistant
 ```
 
 2. Install dependencies
