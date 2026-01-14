@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="poker_ai_calculator"
+        android:label="Poker AA"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

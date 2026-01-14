@@ -7,7 +7,7 @@ part of 'calculator_controller.dart';
 // **************************************************************************
 
 String _$calculatorControllerHash() =>
-    r'49ed3b17f8c68840e562503747924c68917181b7';
+    r'2ea3d07d444f3ea1e5044851a72af56a73fe1e39';
 
 /// See also [CalculatorController].
 @ProviderFor(CalculatorController)

@@ -51,6 +51,8 @@ class PokerCalculatorScreen extends ConsumerWidget {
                           player: player,
                           isSelected: state.selectedPlayerIndex == player.index,
                           gameSettings: state.gameSettings,
+                          players: state.players,
+                          dealerButtonIndex: state.dealerButtonIndex,
                           onSelect: () => controller.selectPlayer(player.index),
                           onRemove: player.isHero
                               ? null
@@ -63,6 +65,7 @@ class PokerCalculatorScreen extends ConsumerWidget {
                               showPlayerStatsModal(context, player: player),
                           onStackChanged: (newStack) => controller
                               .updatePlayerStack(player.index, newStack),
+                          onDealerChanged: controller.setDealerPosition,
                         ),
                       ),
                     ),
@@ -109,7 +112,7 @@ class PokerCalculatorScreen extends ConsumerWidget {
               ),
               const SizedBox(width: 10),
               Text(
-                'Poker Calculator',
+                'Poker AA',
                 style: GoogleFonts.roboto(
                   color: Colors.white,
                   fontSize: 18,
@@ -573,23 +576,29 @@ class _PlayerRow extends StatelessWidget {
   final Player player;
   final bool isSelected;
   final GameSettings gameSettings;
+  final List<Player> players;
+  final int dealerButtonIndex;
   final VoidCallback onSelect;
   final VoidCallback? onRemove;
   final void Function(int) onRemoveCard;
   final void Function(Set<String>) onRangeSelected;
   final VoidCallback onShowStats;
   final void Function(double) onStackChanged;
+  final void Function(int) onDealerChanged;
 
   const _PlayerRow({
     required this.player,
     required this.isSelected,
     required this.gameSettings,
+    required this.players,
+    required this.dealerButtonIndex,
     required this.onSelect,
     this.onRemove,
     required this.onRemoveCard,
     required this.onRangeSelected,
     required this.onShowStats,
     required this.onStackChanged,
+    required this.onDealerChanged,
   });
 
   @override
@@ -618,7 +627,12 @@ class _PlayerRow extends StatelessWidget {
           child: Column(
             children: [
               // Player header
-              _buildPlayerHeader(isUsingRange, isFolded, isCurrentTurn),
+              _buildPlayerHeader(
+                context,
+                isUsingRange,
+                isFolded,
+                isCurrentTurn,
+              ),
               // Player content
               Padding(
                 padding: const EdgeInsets.all(8),
@@ -684,6 +698,7 @@ class _PlayerRow extends StatelessWidget {
   }
 
   Widget _buildPlayerHeader(
+    BuildContext context,
     bool isUsingRange,
     bool isFolded,
     bool isCurrentTurn,
@@ -700,21 +715,39 @@ class _PlayerRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Position badge
+          // Position badge - tappable to change position
           if (player.position != null)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              margin: const EdgeInsets.only(right: 8),
-              decoration: BoxDecoration(
-                color: _getPositionColor(player.position!),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                player.position!.shortName,
-                style: GoogleFonts.robotoMono(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
+            GestureDetector(
+              onTap: () => _showPositionSelector(context),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: _getPositionColor(player.position!),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      player.position!.shortName,
+                      style: GoogleFonts.robotoMono(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    Icon(
+                      Icons.edit,
+                      color: Colors.white.withValues(alpha: 0.7),
+                      size: 10,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -814,6 +847,120 @@ class _PlayerRow extends StatelessWidget {
       default:
         return Colors.grey.shade600;
     }
+  }
+
+  void _showPositionSelector(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: Colors.grey.shade900,
+        title: Text(
+          'Set ${player.displayName} as:',
+          style: GoogleFonts.roboto(color: Colors.white, fontSize: 16),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildPositionOption(
+              dialogContext,
+              'BTN',
+              'Dealer Button',
+              Colors.blue.shade700,
+              () {
+                onDealerChanged(player.index);
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            const SizedBox(height: 8),
+            _buildPositionOption(
+              dialogContext,
+              'SB',
+              'Small Blind',
+              Colors.orange.shade700,
+              () {
+                // Set dealer to previous player
+                final newDealer =
+                    (player.index - 1 + players.length) % players.length;
+                onDealerChanged(newDealer);
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            const SizedBox(height: 8),
+            _buildPositionOption(
+              dialogContext,
+              'BB',
+              'Big Blind',
+              Colors.orange.shade700,
+              () {
+                // Set dealer to 2 positions back
+                final newDealer =
+                    (player.index - 2 + players.length) % players.length;
+                onDealerChanged(newDealer);
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.roboto(color: Colors.grey),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPositionOption(
+    BuildContext context,
+    String position,
+    String description,
+    Color color,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                position,
+                style: GoogleFonts.robotoMono(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              description,
+              style: GoogleFonts.roboto(color: Colors.white, fontSize: 14),
+            ),
+            const Spacer(),
+            const Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.white70,
+              size: 16,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildRangeIndicator(BuildContext context) {

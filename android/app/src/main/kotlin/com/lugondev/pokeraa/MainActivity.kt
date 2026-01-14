@@ -1,4 +1,4 @@
-package com.pokerai.poker_ai_calculator
+package com.lugondev.pokeraa
 
 import io.flutter.embedding.android.FlutterActivity
 

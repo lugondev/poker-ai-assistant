@@ -1,5 +1,5 @@
-name: poker_ai_calculator
-description: "Poker AI Calculator - Calculate winning odds with Monte Carlo simulation"
+name: poker_aa
+description: "Poker AA - Calculate winning odds with Monte Carlo simulation"
 publish_to: 'none'
 
 version: 1.0.0+1
