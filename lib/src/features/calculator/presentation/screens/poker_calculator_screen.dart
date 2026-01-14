@@ -7,12 +7,13 @@ import '../../../ai_chat/presentation/providers/chat_controller.dart';
 import '../../../ai_chat/presentation/widgets/chat_bottom_sheet.dart';
 import '../../../ai_chat/presentation/widgets/chat_fab.dart';
 import '../../../settings/presentation/widgets/app_drawer.dart';
+import '../../domain/entities/card_entity.dart';
 import '../../domain/entities/game_settings.dart';
 import '../../domain/entities/player.dart';
 import '../providers/calculator_controller.dart';
 import '../providers/calculator_state.dart';
 import '../widgets/betting_action_widget.dart';
-import '../widgets/card_selector_widget.dart';
+import '../widgets/card_selector_widget.dart' show showCardSelector;
 import '../widgets/game_settings_widget.dart';
 import '../widgets/player_stats_widget.dart';
 import '../widgets/playing_card_widget.dart';
@@ -63,6 +64,7 @@ class PokerCalculatorScreen extends ConsumerWidget {
                                 gameSettings: state.gameSettings,
                                 players: state.players,
                                 dealerButtonIndex: state.dealerButtonIndex,
+                                usedCards: state.usedCards.toSet(),
                                 onSelect: () =>
                                     controller.selectPlayer(player.index),
                                 onRemove: player.isHero
@@ -74,6 +76,10 @@ class PokerCalculatorScreen extends ConsumerWidget {
                                       player.index,
                                       cardIndex,
                                     ),
+                                onCardSelected: (card) {
+                                  controller.selectPlayer(player.index);
+                                  controller.addCard(card);
+                                },
                                 onRangeSelected: (range) => controller
                                     .setPlayerRange(player.index, range),
                                 onShowStats: () => showPlayerStatsModal(
@@ -95,19 +101,11 @@ class PokerCalculatorScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  CardSelectorWidget(
-                    onCardSelected: controller.addCard,
-                    usedCards: state.usedCards.toSet(),
-                  ),
                 ],
               ),
-              // Chat FAB - positioned above card selector
+              // Chat FAB
               if (!chatState.isOpen)
-                Positioned(
-                  right: 16,
-                  bottom: 180, // Above card selector
-                  child: const ChatFAB(),
-                ),
+                Positioned(right: 16, bottom: 24, child: const ChatFAB()),
               // Chat Bottom Sheet
               if (chatState.isOpen)
                 const Positioned.fill(child: ChatBottomSheet()),
@@ -304,48 +302,58 @@ class PokerCalculatorScreen extends ConsumerWidget {
     CalculatorState state,
     CalculatorController controller,
   ) {
-    final isActive = state.selectionTarget == SelectionTarget.board;
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(5, (index) {
+          final card = index < state.boardCards.length
+              ? state.boardCards[index]
+              : null;
+          final isEnabled = index < state.boardPhase.cardCount;
+          final canAddCard =
+              card == null && isEnabled && state.boardCards.length == index;
 
-    return GestureDetector(
-      onTap: () => controller.setSelectionTarget(SelectionTarget.board),
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: isActive
-              ? Colors.blue.withValues(alpha: 0.1)
-              : Colors.transparent,
-          border: Border.all(
-            color: isActive ? Colors.blue : Colors.transparent,
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(5, (index) {
-            final card = index < state.boardCards.length
-                ? state.boardCards[index]
-                : null;
-            final isEnabled = index < state.boardPhase.cardCount;
-
-            return Opacity(
-              opacity: isEnabled ? 1.0 : 0.3,
-              child: PlayingCardWidget(
-                card: card,
-                isEmpty: card == null,
-                isSelected: isActive && card == null && isEnabled,
-                width: 56,
-                height: 78,
-                showQuestionMark: card == null,
-                onRemove: card != null
-                    ? () => controller.removeCardFromBoard(index)
-                    : null,
-              ),
-            );
-          }),
-        ),
+          return Opacity(
+            opacity: isEnabled ? 1.0 : 0.3,
+            child: PlayingCardWidget(
+              card: card,
+              isEmpty: card == null,
+              isSelected: false,
+              width: 56,
+              height: 78,
+              showQuestionMark: card == null,
+              onTap: canAddCard
+                  ? () => _showCardSelectorForBoard(context, state, controller)
+                  : null,
+              onRemove: card != null
+                  ? () => controller.removeCardFromBoard(index)
+                  : null,
+            ),
+          );
+        }),
       ),
     );
+  }
+
+  Future<void> _showCardSelectorForBoard(
+    BuildContext context,
+    CalculatorState state,
+    CalculatorController controller,
+  ) async {
+    final selectedCard = await showCardSelector(
+      context: context,
+      usedCards: state.usedCards.toSet(),
+    );
+
+    if (selectedCard != null) {
+      controller.setSelectionTarget(SelectionTarget.board);
+      controller.addCard(selectedCard);
+    }
   }
 
   Widget _buildPotAndOddsSection(CalculatorState state) {
@@ -614,9 +622,11 @@ class _PlayerRow extends StatelessWidget {
   final GameSettings gameSettings;
   final List<Player> players;
   final int dealerButtonIndex;
+  final Set<PlayingCard> usedCards;
   final VoidCallback onSelect;
   final VoidCallback? onRemove;
   final void Function(int) onRemoveCard;
+  final void Function(PlayingCard) onCardSelected;
   final void Function(Set<String>) onRangeSelected;
   final VoidCallback onShowStats;
   final void Function(double) onStackChanged;
@@ -628,9 +638,11 @@ class _PlayerRow extends StatelessWidget {
     required this.gameSettings,
     required this.players,
     required this.dealerButtonIndex,
+    required this.usedCards,
     required this.onSelect,
     this.onRemove,
     required this.onRemoveCard,
+    required this.onCardSelected,
     required this.onRangeSelected,
     required this.onShowStats,
     required this.onStackChanged,
@@ -683,13 +695,18 @@ class _PlayerRow extends StatelessWidget {
                           final card = index < player.holeCards.length
                               ? player.holeCards[index]
                               : null;
+                          final canAddCard =
+                              card == null && player.holeCards.length == index;
                           return PlayingCardWidget(
                             card: card,
                             isEmpty: card == null,
-                            isSelected: isSelected && card == null,
+                            isSelected: false,
                             width: 52,
                             height: 72,
                             showQuestionMark: card == null,
+                            onTap: canAddCard
+                                ? () => _showCardSelectorForPlayer(context)
+                                : null,
                             onRemove: card != null
                                 ? () => onRemoveCard(index)
                                 : null,
@@ -731,6 +748,17 @@ class _PlayerRow extends StatelessWidget {
         ),
       ),
     ).animate().fadeIn(duration: 200.ms).slideX(begin: -0.1, end: 0);
+  }
+
+  Future<void> _showCardSelectorForPlayer(BuildContext context) async {
+    final selectedCard = await showCardSelector(
+      context: context,
+      usedCards: usedCards,
+    );
+
+    if (selectedCard != null) {
+      onCardSelected(selectedCard);
+    }
   }
 
   Widget _buildPlayerHeader(

@@ -55,6 +55,18 @@ lib/
                 └── widgets/
 ```
 
+## Screenshots
+
+| Main Calculator | Navigation |
+|:---:|:---:|
+| ![Main Calculator Screen](screenshots/main.png) | ![Navigation View](screenshots/nav.png) |
+| **Main calculator interface for equity calculations** | **App navigation and menu** |
+
+| AI Assistant | AI Configuration |
+|:---:|:---:|
+| ![AI Assistant](screenshots/ai-assistant.png) | ![AI Configuration](screenshots/ai-config.png) |
+| **AI-powered hand analysis assistant** | **Configure AI settings and preferences** |
+
 ## Tech Stack
 
 - **State Management**: Riverpod
